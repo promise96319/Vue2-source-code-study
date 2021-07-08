@@ -1,0 +1,45 @@
+<html>
+    <header>
+        <script src="../dist/vue.js"></script>
+    </header>
+    <body>
+        <div id="app"></div>
+        <script>
+            Vue.component('button-counter', {
+              data() {
+                return {
+                  count: 0
+                }
+              },
+              template: '<button v-on:click="count++">You clicked me {{ count }} times. <div><slot></slot></div></button>'
+            })
+
+            new Vue({
+                el: '#app',
+                data: {
+                    message: 'this is a message',
+                    isShow: true,
+                    type: 'a-button'
+                },
+                //  <div v-if="isShow" style="width: 100px; height: 20px;" :type="type">
+                //     Hello World, {{ message }}
+                //     <div class="child" type="text">
+                //         child, {{ message }}
+                //     </div>
+                //     <div class="item" v-for="(item, index) in 10">
+                //         {{ item }}
+                //     </div>
+                template: `
+               
+<div>
+                    <button-counter>
+                        I am a slot component
+                    </button-counter>
+                </div>`,
+                created() {
+                    this.message = 'create change'
+                }
+            })
+        </script>
+    </body>
+</html>
