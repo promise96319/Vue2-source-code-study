@@ -46,7 +46,7 @@ export function isObject (obj: mixed): boolean %checks {
  * Get the raw type string of a value, e.g., [object Object].
  */
 const _toString = Object.prototype.toString
-
+// * 获取原生类型
 export function toRawType (value: any): string {
   return _toString.call(value).slice(8, -1)
 }
@@ -55,10 +55,12 @@ export function toRawType (value: any): string {
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
+// * 是否是对象
 export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
 
+// * 是否是正则
 export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
 }
@@ -66,11 +68,13 @@ export function isRegExp (v: any): boolean {
 /**
  * Check if val is a valid array index.
  */
+// * 检查是否是有效的数组index
 export function isValidArrayIndex (val: any): boolean {
   const n = parseFloat(String(val))
   return n >= 0 && Math.floor(n) === n && isFinite(val)
 }
 
+// * 是否是 promise
 export function isPromise (val: any): boolean {
   return (
     isDef(val) &&
@@ -82,6 +86,7 @@ export function isPromise (val: any): boolean {
 /**
  * Convert a value to a string that is actually rendered.
  */
+// * 兼容写法的 string 转换方法
 export function toString (val: any): string {
   return val == null
     ? ''
@@ -103,6 +108,8 @@ export function toNumber (val: string): number | string {
  * Make a map and return a function for checking if a key
  * is in that map.
  */
+// * 'key1,key2' 转换成 { key1: true, key2: true }
+// * 然后判断某个 key 是否在这里面
 export function makeMap (
   str: string,
   expectsLowerCase?: boolean
@@ -125,11 +132,13 @@ export const isBuiltInTag = makeMap('slot,component', true)
 /**
  * Check if an attribute is a reserved attribute.
  */
+// * 是否是保留的属性
 export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is')
 
 /**
  * Remove an item from an array.
  */
+// * 从数组中移除某个元素
 export function remove (arr: Array<any>, item: any): Array<any> | void {
   if (arr.length) {
     const index = arr.indexOf(item)
@@ -143,6 +152,7 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
  * Check whether an object has the property.
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
+// * 自身是否含有某个属性
 export function hasOwn (obj: Object | Array<*>, key: string): boolean {
   return hasOwnProperty.call(obj, key)
 }
@@ -150,6 +160,7 @@ export function hasOwn (obj: Object | Array<*>, key: string): boolean {
 /**
  * Create a cached version of a pure function.
  */
+// * 缓存函数，通过闭包缓存结果
 export function cached<F: Function> (fn: F): F {
   const cache = Object.create(null)
   return (function cachedFn (str: string) {
@@ -162,6 +173,7 @@ export function cached<F: Function> (fn: F): F {
  * Camelize a hyphen-delimited string.
  */
 const camelizeRE = /-(\w)/g
+// * 驼峰处理，如 vue-component 转换成 vueComponent
 export const camelize = cached((str: string): string => {
   return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '')
 })
@@ -169,6 +181,7 @@ export const camelize = cached((str: string): string => {
 /**
  * Capitalize a string.
  */
+// * 首字母转换成大写
 export const capitalize = cached((str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1)
 })
@@ -177,6 +190,7 @@ export const capitalize = cached((str: string): string => {
  * Hyphenate a camelCase string.
  */
 const hyphenateRE = /\B([A-Z])/g
+// * 驼峰转换成连字符形式，如 vueComponent 转换成 vue-component
 export const hyphenate = cached((str: string): string => {
   return str.replace(hyphenateRE, '-$1').toLowerCase()
 })
@@ -208,6 +222,7 @@ function nativeBind (fn: Function, ctx: Object): Function {
   return fn.bind(ctx)
 }
 
+// * bind 的兼容写法
 export const bind = Function.prototype.bind
   ? nativeBind
   : polyfillBind
@@ -215,6 +230,7 @@ export const bind = Function.prototype.bind
 /**
  * Convert an Array-like object to a real Array.
  */
+// * 类数组 转换成 数组，如 arguments 转换成 array
 export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
   let i = list.length - start
@@ -228,6 +244,7 @@ export function toArray (list: any, start?: number): Array<any> {
 /**
  * Mix properties into target object.
  */
+// * 将 后者 的属性添加到 前者
 export function extend (to: Object, _from: ?Object): Object {
   for (const key in _from) {
     to[key] = _from[key]
@@ -238,6 +255,7 @@ export function extend (to: Object, _from: ?Object): Object {
 /**
  * Merge an Array of Objects into a single Object.
  */
+// * 由对象组成的数组转化成对象，如 [{ a: 1}, { b: 2}] 转换成 { a: 1, b: 2 }
 export function toObject (arr: Array<any>): Object {
   const res = {}
   for (let i = 0; i < arr.length; i++) {
@@ -272,6 +290,7 @@ export const identity = (_: any) => _
 /**
  * Generate a string containing static keys from compiler modules.
  */
+// * 根据 modules 将 staticKeys 生成字符串，如 'staticClass,staticStyle'
 export function genStaticKeys (modules: Array<ModuleOptions>): string {
   return modules.reduce((keys, m) => {
     return keys.concat(m.staticKeys || [])
@@ -282,6 +301,7 @@ export function genStaticKeys (modules: Array<ModuleOptions>): string {
  * Check if two values are loosely equal - that is,
  * if they are plain objects, do they have the same shape?
  */
+// * 是否是每个值都相等，不是用引用（指向）来判断相等
 export function looseEqual (a: any, b: any): boolean {
   if (a === b) return true
   const isObjectA = isObject(a)
@@ -322,6 +342,7 @@ export function looseEqual (a: any, b: any): boolean {
  * found in the array (if value is a plain object, the array must
  * contain an object of the same shape), or -1 if it is not present.
  */
+// * 找到数组中的某个元素，相等是根据每个原始数据的值相等进行判断的
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
   for (let i = 0; i < arr.length; i++) {
     if (looseEqual(arr[i], val)) return i
@@ -332,6 +353,7 @@ export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
 /**
  * Ensure a function is called only once.
  */
+// * 执行一次的函数，通过闭包来控制
 export function once (fn: Function): Function {
   let called = false
   return function () {
