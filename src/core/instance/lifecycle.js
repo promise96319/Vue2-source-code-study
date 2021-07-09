@@ -95,6 +95,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
 
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
+    // * _watcher 为 renderWatcher，
+    // * 这里相当于直接调用了 updateComponent 方法，即 _update(_render())
     if (vm._watcher) {
       vm._watcher.update()
     }
