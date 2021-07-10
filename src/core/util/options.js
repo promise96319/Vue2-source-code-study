@@ -368,7 +368,7 @@ function normalizeProps (options: Object, vm: ?Component) {
 
 /**
  * Normalize all injections into Object-based format
- * 数组或对象格式
+ * * 数组或对象格式
  */
 function normalizeInject (options: Object, vm: ?Component) {
   const inject = options.inject
@@ -437,17 +437,23 @@ export function mergeOptions (
     child = child.options
   }
 
+  // * ['type1'], { type2: { type: String, default: '' } } 两种形式
+  // * 都转换成后一种形式
   normalizeProps(child, vm)
+  // * ['injectKey1'], { injectKey2: { from: 'xxx', default: 'yyy' } } 两种形式
+  // * 都转换成后一种形式
   normalizeInject(child, vm)
+  // * directive 有两种形式 function() {} 或者是 { bind, update, ... }
+  // * 都转换成后一种形式
   normalizeDirectives(child)
 
   // Apply extends and mixins on the child options,
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
-  // 如果当前options没有_base，代表他不是vue实例的options，而是‘手动’传入的options
-  // (构造函数的options都具有_base，所以需要合并 extends 和 mixins)
-  // 合并 extends 和 mixins
+  // * 如果当前 options 没有_base，代表他不是vue实例的options，而是‘手动’传入的options
+  // * (构造函数的 options 都具有_base，所以需要合并 extends 和 mixins)
+  // * 合并 extends 和 mixins
   if (!child._base) {
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm)
@@ -459,7 +465,7 @@ export function mergeOptions (
     }
   }
 
-  // 合并策略
+  // * 合并策略
   const options = {}
   let key
   for (key in parent) {

@@ -31,7 +31,7 @@ export function initExtend (Vue: GlobalAPI) {
       validateComponentName(name)
     }
 
-    // 继承
+    // * 继承
     const Sub = function VueComponent (options) {
       this._init(options)
     }
@@ -42,7 +42,7 @@ export function initExtend (Vue: GlobalAPI) {
       Super.options,
       extendOptions
     )
-    // 继承的 super
+    // * 继承的 super
     Sub['super'] = Super
 
     // For props and computed properties, we define the proxy getters on

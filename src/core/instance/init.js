@@ -138,6 +138,8 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       // * 由于 options 变化了，重新合并一次
       options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
       if (options.name) {
+        // * 将自身的构造函数也存在了 components 对象中
+        // todo 为什么要这么做？
         options.components[options.name] = Ctor
       }
     }
