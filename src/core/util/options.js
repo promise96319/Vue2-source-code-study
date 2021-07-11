@@ -45,10 +45,10 @@ if (process.env.NODE_ENV !== 'production') {
 
 /**
  * Helper that recursively merges two data objects together.
- * 递归自身data
- * 如果本身不存在，则使用父的值
- * 如果是对象，就行递归处理
- * 如果不是对象，就使用自身的值
+ * * 递归自身data
+ * * 如果本身不存在，则使用父的值
+ * * 如果是对象，就行递归处理
+ * * 如果不是对象，就使用自身的值
  */
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
@@ -61,24 +61,25 @@ function mergeData (to: Object, from: ?Object): Object {
 
   for (let i = 0; i < keys.length; i++) {
     key = keys[i]
-    // ["domain", "sort_field", "sort_order", "__ob__"]
-    // 0: "domain"
-    // 1: "sort_field"
-    // 2: "sort_order"
-    // 3: "__ob__"
+    // * ["domain", "sort_field", "sort_order", "__ob__"]
+    // * 0: "domain"
+    // * 1: "sort_field"
+    // * 2: "sort_order"
+    // * 3: "__ob__"
     // in case the object is already observed...
     if (key === '__ob__') continue
     toVal = to[key]
     fromVal = from[key]
+    // * 自身不存在这个key，那么使用 from 的 key 和 value
+    // * 如果 to 原本是响应式的，那么新增的 key 值也需要是响应式的
     if (!hasOwn(to, key)) {
-      // 1. 如果自身不包含 key，那么使用的值
       set(to, key, fromVal)
     } else if (
       toVal !== fromVal &&
       isPlainObject(toVal) &&
       isPlainObject(fromVal)
     ) {
-      // 2. 如果都是对象，继续合并
+      // *2. 如果都是对象，继续合并
       mergeData(toVal, fromVal)
     }
   }
@@ -95,7 +96,7 @@ export function mergeDataOrFn (
   vm?: Component
 ): ?Function {
   if (!vm) {
-    // 通过继承创建构造函数的时候，此时没有实例化，是没有实例的
+    // * 通过继承创建构造函数的时候，此时没有实例化，是没有实例的
     if (!childVal) {
       return parentVal
     }
@@ -134,7 +135,7 @@ export function mergeDataOrFn (
 /**
  * * data合并策略
  * * 1. vm什么时候存在？extend，mixin的时候不存在
- * * 2. 返回的是函数？防止一个组件的构造函数多处实例化时，data被共享
+ * * 2. 返回的是函数？防止一个组件的构造函数多处实例化时，data被共享（使用的是同一引用）
  * 
  * * 如果本身不存在，则使用父的值
  * * 如果是对象，就行递归处理
@@ -451,9 +452,8 @@ export function mergeOptions (
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
-  // * 如果当前 options 没有_base，代表他不是vue实例的options，而是‘手动’传入的options
-  // * (构造函数的 options 都具有_base，所以需要合并 extends 和 mixins)
-  // * 合并 extends 和 mixins
+  // * 构造函数的 options 在 initGlobalApi 的时候会处理 options._base = Vue
+  // * options 里的 extends 和 mixins，并非构造函数且未合并到 options 中
   if (!child._base) {
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm)

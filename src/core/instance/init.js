@@ -33,6 +33,7 @@ export function initMixin (Vue: Class<Component>) {
     // * options._isComponent 是在 patch 阶段检测到是 component 的时候赋值的
     // * 此时正在实例化子组件
     if (options && options._isComponent) {
+      // todo 为什么这种方式会变快？为什么组件需要单独处理？
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
@@ -80,6 +81,11 @@ export function initMixin (Vue: Class<Component>) {
 // todo 为什么这种方式会变快？
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   // * Vue 构造函数的 options
+  // * const options: InternalComponentOptions = {
+  // *   _isComponent: true,
+  // *   _parentVnode: vnode,
+  // *   parent
+  // * }
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
   // * _parentVnode 为父组件的 vnode

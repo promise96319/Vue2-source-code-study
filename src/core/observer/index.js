@@ -153,6 +153,8 @@ export function defineReactive (
     val = obj[key]
   }
 
+  // * { level1: { level2: value2 } }
+  // * shallow: 处理 $attrs, $listeners 的时候 shallow 为 true
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
@@ -162,6 +164,9 @@ export function defineReactive (
       if (Dep.target) {
         dep.depend()
         if (childOb) {
+          // todo 这个 dep 和 闭包的 dep 有什么区别呢？
+          // * 这里的 dep 是对象的 dep, 当为对象添加属性时触发。
+          // * 而闭包里的 dep 是值的 dep，设置某个key值的时候触发。
           childOb.dep.depend()
           if (Array.isArray(value)) {
             dependArray(value)
@@ -204,11 +209,13 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // * 如果是数组，key 是 index，那么将对应的 value 进行替换
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     return val
   }
+  // * 存在 key ，且原型中 不存在
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
@@ -221,11 +228,14 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     )
     return val
   }
+  // * 如果没有 ob，说明对象本来就不是响应式的，这里也没必要做响应式处理
   if (!ob) {
     target[key] = val
     return val
   }
+  // * 对象本来就是响应式的，那么添加的 key 也要做响应式处理
   defineReactive(ob.value, key, val)
+  // * 当为对象添加属性时触发对象搜集的依赖
   ob.dep.notify()
   return val
 }
