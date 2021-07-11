@@ -48,23 +48,24 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
-  // 校验 props 并添加到 vm 上 设置为响应式
+  // * 校验 props 并添加到 vm 上 设置为响应式
   if (opts.props) initProps(vm, opts.props)
-  // 将 options 里的 methods 分别挂载到 vm 上
+  // * 将 options 里的 methods 分别挂载到 vm 上
   if (opts.methods) initMethods(vm, opts.methods)
-  // 校验 data key是否冲突 并添加到 vm 上 设置为响应式
+  // * 校验 data key是否冲突 并添加到 vm 上 设置为响应式
   if (opts.data) {
     initData(vm)
   } else {
     observe(vm._data = {}, true /* asRootData */)
   }
-  // 实例化 computed watcher 并作为依赖添加到相应的数据中
+  // * 实例化 computed watcher 并作为依赖添加到相应的数据中
   if (opts.computed) initComputed(vm, opts.computed)
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
   }
 }
 
+// * 将所有 props 响应式处理
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
@@ -113,6 +114,7 @@ function initProps (vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
+// * 将所有 data 响应式处理
 function initData (vm: Component) {
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
@@ -170,6 +172,7 @@ export function getData (data: Function, vm: Component): any {
 
 const computedWatcherOptions = { lazy: true }
 
+// * 根据所有的 computed key 实例化 _computedWatchers = { key: watcher }
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null)
@@ -242,17 +245,18 @@ export function defineComputed (
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+// * 获取 computed 值 时，就会触发下面方法
 function createComputedGetter (key) {
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
-      // * 如果不需要计算就跳过了
+      // * 如果dirty为true，则需要计算。计算完了就变为false了
       if (watcher.dirty) {
         watcher.evaluate()
       }
       // *这里的 dep.target 有可能是其他的 watcher
-      // *比如render的时候使用了computed，然后compute的依赖了data，
-      // *那么这个时候就需要使得 data 搜集render了
+      // *比如render的时候使用了 computed，然后 compute的依赖了 data，
+      // *那么这个时候就需要使得 render 其实也依赖于 data 里的数据
       if (Dep.target) {
         watcher.depend()
       }
@@ -268,6 +272,7 @@ function createGetterInvoker(fn) {
   }
 }
 
+// * 将 methods 挂到 vm 上
 function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
@@ -296,6 +301,7 @@ function initMethods (vm: Component, methods: Object) {
   }
 }
 
+// * 直接 $watch 相应的 key
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
@@ -351,6 +357,7 @@ export function stateMixin (Vue: Class<Component>) {
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
 
+  
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
@@ -363,6 +370,7 @@ export function stateMixin (Vue: Class<Component>) {
     options = options || {}
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)
+    // * 如果传入了 immediate，那么会立即执行一次
     if (options.immediate) {
       pushTarget()
       try {
@@ -372,6 +380,7 @@ export function stateMixin (Vue: Class<Component>) {
       }
       popTarget()
     }
+    // * 取消监听，从依赖中移除
     return function unwatchFn () {
       watcher.teardown()
     }

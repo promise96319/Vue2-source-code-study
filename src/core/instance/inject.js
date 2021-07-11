@@ -4,7 +4,7 @@ import { hasOwn } from 'shared/util'
 import { warn, hasSymbol } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
 
-// * _provided 对象
+// * 处理 provide 得到 _provided 对象
 export function initProvide (vm: Component) {
   const provide = vm.$options.provide
   if (provide) {
@@ -14,6 +14,7 @@ export function initProvide (vm: Component) {
   }
 }
 
+// * 将 inject 里的 key 挂载到 vm 上
 export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
@@ -53,6 +54,8 @@ export function resolveInject (inject: any, vm: Component): ?Object {
       if (key === '__ob__') continue
       const provideKey = inject[key].from
       let source = vm
+      // * 这个时候父组件的 _provided 其实是已经处理过了的
+      // * 但是当前组件的 _provided 还未被处理
       while (source) {
         if (source._provided && hasOwn(source._provided, provideKey)) {
           result[key] = source._provided[provideKey]

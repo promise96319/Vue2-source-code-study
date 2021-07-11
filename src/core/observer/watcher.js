@@ -104,7 +104,7 @@ export default class Watcher {
     const vm = this.vm
     try {
       value = this.getter.call(vm, vm)
-    } catch (e) {
+    } catch (e) { 
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)
       } else {
@@ -196,7 +196,7 @@ export default class Watcher {
         const oldValue = this.value
         this.value = value
 
-        // 如果是 this.$watch 监听
+        // * 如果是 this.$watch 监听
         if (this.user) {
           try {
             this.cb.call(this.vm, value, oldValue)
@@ -223,7 +223,7 @@ export default class Watcher {
 
   /**
    * Depend on all deps collected by this watcher.
-   * * 当前watcher的dep搜集依赖
+   * * 当前 watcher 的 dep 搜集依赖
    */
   depend () {
     let i = this.deps.length

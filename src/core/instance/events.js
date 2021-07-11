@@ -13,6 +13,8 @@ export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events
+  // * init 文件 initInternalComponent 方法
+  // * 如果父组件监听了事件，那么这个位置就需要在 vm 上进行监听这个事件，不然无法触发
   const listeners = vm.$options._parentListeners
   if (listeners) {
     updateComponentListeners(vm, listeners)
@@ -49,6 +51,7 @@ export function updateComponentListeners (
   target = undefined
 }
 
+// * on , off, once, emit 方法
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {

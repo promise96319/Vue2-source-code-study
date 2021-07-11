@@ -32,7 +32,7 @@ export function setActiveInstance(vm: Component) {
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
-  // 在父元素中添加自身
+  // * 建立父子关系，在父元素中 $children 添加自身
   // locate first non-abstract parent
   let parent = options.parent
   if (parent && !options.abstract) {
@@ -48,6 +48,7 @@ export function initLifecycle (vm: Component) {
   vm.$children = []
   vm.$refs = {}
 
+  // * render watcher
   vm._watcher = null
   vm._inactive = null
   vm._directInactive = false
@@ -356,6 +357,7 @@ export function callHook (vm: Component, hook: string) {
       invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
+  // * 如果绑定的事件中有 hook:[eventName], 那么 _hasHookEvent 为true
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

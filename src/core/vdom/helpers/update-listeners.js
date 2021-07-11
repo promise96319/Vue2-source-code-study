@@ -11,6 +11,7 @@ import {
   isPlainObject
 } from 'shared/util'
 
+// * 解析出事件的名称以及修饰符
 const normalizeEvent = cached((name: string): {
   name: string,
   once: boolean,
@@ -19,6 +20,7 @@ const normalizeEvent = cached((name: string): {
   handler?: Function,
   params?: Array<any>
 } => {
+  // * 在监听事件的时候，会对修饰符进行处理，&~!等符号就是那个时候转换添加的
   const passive = name.charAt(0) === '&'
   name = passive ? name.slice(1) : name
   const once = name.charAt(0) === '~' // Prefixed last, checked first
@@ -50,6 +52,7 @@ export function createFnInvoker (fns: Function | Array<Function>, vm: ?Component
   return invoker
 }
 
+
 export function updateListeners (
   on: Object,
   oldOn: Object,
@@ -69,29 +72,30 @@ export function updateListeners (
       event.params = def.params
     }
     if (isUndef(cur)) {
-      // 新事件不能为空
+      // * 新事件不能为空
       process.env.NODE_ENV !== 'production' && warn(
         `Invalid handler for event "${event.name}": got ` + String(cur),
         vm
       )
     } else if (isUndef(old)) {
-      // 老事件不存在
-      // fns 不存在，那么 cur就是 fns =》 处理后cur.fns就存在了，且执行的时候可以批量执行
-      // 此处相当于把多个函数的执行封装成一个函数了
+      // * 老事件不存在
+      // * fns 不存在，那么 cur就是 fns =》 处理后cur.fns就存在了，且执行的时候可以批量执行
+      // * 此处相当于把多个函数的执行封装成一个函数了
       if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur, vm)
       }
       if (isTrue(event.once)) {
         cur = on[name] = createOnceHandler(event.name, cur, event.capture)
       }
-      // 添加事件
+      // * 添加事件
       add(event.name, cur, event.capture, event.passive, event.params)
     } else if (cur !== old) {
-      // 老旧事件同时存在 ，old执行函数肯定是经过封装的，直接替换成现有的
+      // * 老旧事件同时存在 ，old执行函数肯定是经过封装的，直接替换成现有的
       old.fns = cur
       on[name] = old
     }
   }
+  // * 移除新事件中没有的老事件
   for (name in oldOn) {
     if (isUndef(on[name])) {
       event = normalizeEvent(name)
