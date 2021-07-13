@@ -84,7 +84,7 @@ export function parseHTML (html, options) {
           }
         }
 
-        // * 浏览器内部条件判断注释，跳过
+        // * 如果是浏览器内部条件判断注释，跳过
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
@@ -104,7 +104,7 @@ export function parseHTML (html, options) {
         }
 
         // End tag:
-        // * 如果是 end tag ，如 </div>
+        // * 如果是结束标签 end tag ，如 </div>，解析 endTag
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -114,7 +114,7 @@ export function parseHTML (html, options) {
         }
 
         // Start tag:
-        // * 如果是 start tag 如 <div class="header">
+        // * 如果是 start tag 如 <div class="header">，进行解析
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
@@ -159,7 +159,7 @@ export function parseHTML (html, options) {
         options.chars(text, index - text.length, index)
       }
     } else {
-      // * lastTag 存在，说明刚处理完了结束标签
+      // * lastTag 存在 或者是 script/style 标签，说明刚处理完了结束标签
       // todo 不清楚这里是干嘛的？
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
@@ -213,6 +213,7 @@ export function parseHTML (html, options) {
       }
       advance(start[0].length)
       let end, attr
+      // * attr => [0: 'v-if=isShow', 1: 'v-if', 2: '=', 3: 'isShow', ... ]
       while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
         attr.start = index
         advance(attr[0].length)
@@ -234,7 +235,9 @@ export function parseHTML (html, options) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
 
+    // * expectHTML 默认为 true
     if (expectHTML) {
+      // * 如果上一个标签是 p 标签，内部又不是段落标签的话，需要结束 p 标签
       if (lastTag === 'p' && isNonPhrasingTag(tagName)) {
         parseEndTag(lastTag)
       }
@@ -299,7 +302,7 @@ export function parseHTML (html, options) {
     }
 
     if (pos >= 0) {
-      // * 如果有匹配的标签，那么将两者直接的标签全部 end
+      // * 如果有匹配的标签，那么将两者之间的标签全部 end
       // Close all the open elements, up the stack
       for (let i = stack.length - 1; i >= pos; i--) {
         if (process.env.NODE_ENV !== 'production' &&

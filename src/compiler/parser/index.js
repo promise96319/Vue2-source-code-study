@@ -82,13 +82,17 @@ export function parse (
 ): ASTElement | void {
   warn = options.warn || baseWarn
 
+  // * 是否是 pre 标签
   platformIsPreTag = options.isPreTag || no
   platformMustUseProp = options.mustUseProp || no
   platformGetTagNamespace = options.getTagNamespace || no
+  // * 是否是保留标签
   const isReservedTag = options.isReservedTag || no
+  // * 可能是组件
   maybeComponent = (el: ASTElement) => !!el.component || !isReservedTag(el.tag)
 
   // * web/compiler/modules
+  // * 解析静态和动态的 style, class 等
   transforms = pluckModuleFunction(options.modules, 'transformNode')
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode')
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode')
@@ -115,13 +119,14 @@ export function parse (
   // * 闭合标签
   function closeElement (element) {
     trimEndingWhitespace(element)
+    // todo processed 是在 preTransformNode 里处理的?
     if (!inVPre && !element.processed) {
       element = processElement(element, options)
     }
 
     // tree management
     // * 如果不为 root 且栈中没有元素，说明此元素与root元素是并列关系
-    // * 如果有 if/else 判断则是允许的
+    // * 如果有 if/else 判断则是允许的，否则根元素不止一个
     if (!stack.length && element !== root) {
       // allow root elements with v-if, v-else-if and v-else
       if (root.if && (element.elseif || element.else)) {
@@ -147,11 +152,13 @@ export function parse (
       if (element.elseif || element.else) {
         processIfConditions(element, currentParent)
       } else {
+        // * 存在则表示这里是 slot 语法
         if (element.slotScope) {
           // scoped slot
           // keep it in the children list so that v-else(-if) conditions can
           // find it as the prev node.
           const name = element.slotTarget || '"default"'
+          // * 如果是 slot 语法，需要将 element 添加到 parent 下的 scopedSlots 中
           ;(currentParent.scopedSlots || (currentParent.scopedSlots = {}))[name] = element
         }
         currentParent.children.push(element)
@@ -294,8 +301,11 @@ export function parse (
         processRawAttrs(element)
       } else if (!element.processed) {
         // structural directives
+        // * { for: true/false, alias, iterator1, iterator2? }
         processFor(element)
+        // * ifConditions: [{ exp, block: el }, ...]
         processIf(element)
+        // * el.once = true/false
         processOnce(element)
       }
 
@@ -312,6 +322,7 @@ export function parse (
         currentParent = element
         stack.push(element)
       } else {
+      // * 如果是单标签，需要闭合标签
         closeElement(element)
       }
     },
@@ -454,7 +465,7 @@ export function processElement (
   element: ASTElement,
   options: CompilerOptions
 ) {
-  // 添加 key
+  // * 添加 key 值，el.key = exp
   processKey(element)
 
   // determine whether this is a plain element after
@@ -465,10 +476,15 @@ export function processElement (
     !element.attrsList.length
   )
 
+  // * el.ref = ref, el.refInFor = 检查是否在 for 循环中
   processRef(element)
+  // * el.slot el.slotTarget el.slotTargetDynamic el.scopedSlots
   processSlotContent(element)
+  // * 解析 slot 标签
   processSlotOutlet(element)
+  // * :is => el.component / inlineTemplate => el.inlineTemplate
   processComponent(element)
+  // * el 静态 style / class 处理
   for (let i = 0; i < transforms.length; i++) {
     element = transforms[i](element, options) || element
   }
@@ -476,7 +492,7 @@ export function processElement (
   return element
 }
 
-// * 如果有 key 存在 =》 el.key = exp
+// * 如果有 key 存在： el.key = exp
 function processKey (el) {
   const exp = getBindingAttr(el, 'key')
   if (exp) {
@@ -595,7 +611,8 @@ function processIf (el) {
   }
 }
 
-// * 判断 elseif / else 前是否有 if
+// * 判断有 elseif / else的当前元素的前面的元素是否有 if
+// * 如果有 if，将当前元素的 exp,el 添加到前一个元素的 ifConditions 上
 function processIfConditions (el, parent) {
   const prev = findPrevElement(parent.children)
   if (prev && prev.if) {
@@ -649,6 +666,11 @@ function processOnce (el) {
 
 // handle content being passed to a component as slot,
 // e.g. <template slot="xxx">, <div slot-scope="xxx">
+// * 老式写法：slot="default" slot-scope="scope"
+// * .slotScope 传递的参数
+// * .slotTarget slot的名称
+// * .slotTargetDynamic 动态绑定:slot的名称
+// * .scopedSlots 为 children 数组
 function processSlotContent (el) {
   let slotScope
   if (el.tag === 'template') {
@@ -680,6 +702,7 @@ function processSlotContent (el) {
   }
 
   // slot="xxx"
+  // * slot="xxx"
   const slotTarget = getBindingAttr(el, 'slot')
   if (slotTarget) {
     el.slotTarget = slotTarget === '""' ? '"default"' : slotTarget
@@ -692,6 +715,7 @@ function processSlotContent (el) {
   }
 
   // 2.6 v-slot syntax
+  // * 新 slot 语法
   if (process.env.NEW_SLOT_SYNTAX) {
     if (el.tag === 'template') {
       // v-slot on <template>
@@ -764,6 +788,7 @@ function processSlotContent (el) {
   }
 }
 
+// * 解析 slot 的名称
 function getSlotName (binding) {
   let name = binding.name.replace(slotRE, '')
   if (!name) {
@@ -784,6 +809,7 @@ function getSlotName (binding) {
 }
 
 // handle <slot/> outlets
+// * 解析 slot 标签
 function processSlotOutlet (el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
@@ -810,6 +836,7 @@ function processComponent (el) {
 }
 
 // * 处理 attrs
+// * el[attrName] = attrValue
 function processAttrs (el) {
   const list = el.attrsList
   let i, l, name, rawName, value, modifiers, syncGen, isDynamic
@@ -821,6 +848,7 @@ function processAttrs (el) {
       // mark element as dynamic
       el.hasBindings = true
       // modifiers
+      // * 修饰符
       modifiers = parseModifiers(name.replace(dirRE, ''))
       // support .foo shorthand syntax for the .prop modifier
       if (process.env.VBIND_PROP_SHORTHAND && propBindRE.test(name)) {
@@ -857,6 +885,7 @@ function processAttrs (el) {
           if (modifiers.sync) {
             // todo: 同步的过程 .sync  => v-model
             syncGen = genAssignmentCode(value, `$event`)
+            // * $emit('update:xxx') 事件触发
             if (!isDynamic) {
               addHandler(
                 el,
