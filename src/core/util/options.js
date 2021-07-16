@@ -88,7 +88,7 @@ function mergeData (to: Object, from: ?Object): Object {
 
 /**
  * Data
- * 合并后返回合并data的函数
+ * * 合并后返回合并data的函数
  */
 export function mergeDataOrFn (
   parentVal: any,
@@ -166,6 +166,9 @@ strats.data = function (
 /**
  * Hooks and props are merged as arrays.
  */
+// * parent hooks 要么不存在，要么是合并后的
+// * 当 parent hooks 不存在时，使用 child 的 array 形式
+// * 当 parent hooks 存在时，使用因为已经合并过，所以为 array 形式
 function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
@@ -182,7 +185,9 @@ function mergeHook (
     : res
 }
 
-// hooks去重
+// * hooks去重
+// todo 为什么要去重？为什么留下 parent 的？
+// * 去除执行函数一致的函数。防止多个组件实例钩子选项相互影响
 function dedupeHooks (hooks) {
   const res = []
   for (let i = 0; i < hooks.length; i++) {
@@ -434,6 +439,7 @@ export function mergeOptions (
     checkComponents(child)
   }
 
+  // * 例如：child 如果是Vue构造函数，那么取的 Vue.options, 此时 _base 为 Vue
   if (typeof child === 'function') {
     child = child.options
   }
@@ -453,8 +459,17 @@ export function mergeOptions (
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
   // * 构造函数的 options 在 initGlobalApi 的时候会处理 options._base = Vue
-  // * options 里的 extends 和 mixins，并非构造函数且未合并到 options 中
+  // * Vue.options._base = true
+  // * extend, mixin 将新增 options 合并到了 Vue.options 上
+  // * mergeOptions 又将 Vue.options 合并到 vm.options 上
+  // * options 里的 extends 和 mixins，未经过处理的 options 才合并到 options 中
+  // * 如果 _base 存在，那么说明已经被合并过了，也就是 extends, mixins 被处理过了
+  // TODO: 在什么情况下 _base 存在
+  // * parentOptions 的 _base 都是存在的，也就是合并过的 options _base 才存在。
+  // * parentOptions 一般是什么？Vue.options，而且并不存在 mixins, extends，
+  // * 每次合并后的 extends, mixins 都被处理过了
   if (!child._base) {
+    // * child.extends 可以传构造函数
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm)
     }

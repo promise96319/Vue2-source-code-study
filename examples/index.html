@@ -5,6 +5,16 @@
     <body>
         <div id="app"></div>
         <script>
+            const Parent = Vue.extend({
+                created(){
+                    console.log('parent')
+                }
+            })
+            console.log('Parent ==> ', Parent);
+        </script>
+
+        <!-- 测试 -->
+        <script>
             Vue.component('button-counter', {
               data() {
                 return {
