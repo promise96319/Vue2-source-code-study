@@ -1,55 +1,83 @@
 <html>
-    <header>
-        <script src="../dist/vue.js"></script>
-    </header>
-    <body>
-        <div id="app"></div>
-        <script>
-            const Parent = Vue.extend({
-                created(){
-                    console.log('parent')
-                }
-            })
-            console.log('Parent ==> ', Parent);
-        </script>
+<header>
+  <script src="../dist/vue.js"></script>
+</header>
 
-        <!-- 测试 -->
-        <script>
-            Vue.component('button-counter', {
-              data() {
-                return {
-                  count: 0
-                }
-              },
-              template: '<button v-on:click="count++">You clicked me {{ count }} times. <div><slot></slot></div></button>'
-            })
+<body>
+  <div id="app"></div>
+  <!-- 测试 hooks 合并 -->
+  <!-- <script>
+    const extend = {
+      created() {
+        console.log('extends')
+      }
+    }
+    const mixins = {
+      created() {
+        console.log('mixins')
+      }
+    }
 
-            new Vue({
-                el: '#app',
-                data: {
-                    message: 'this is a message',
-                    isShow: true,
-                    type: 'a-button'
-                },
-                //  <div v-if="isShow" style="width: 100px; height: 20px;" :type="type">
-                //     Hello World, {{ message }}
-                //     <div class="child" type="text">
-                //         child, {{ message }}
-                //     </div>
-                //     <div class="item" v-for="(item, index) in 10">
-                //         {{ item }}
-                //     </div>
-                template: `
-               
-<div>
+    const Parent = Vue.extend({
+      created() {
+        console.log('parent created')
+      },
+      mixins: [mixins],
+      extends: extend,
+    })
+
+    new Parent({
+      created() {
+        console.log('child')
+      },
+      mixins: [mixins],
+      extends: {
+        created() {
+          console.log('child extends')
+        }
+      }
+    })
+
+  </script> -->
+
+  <!-- 测试编译流程 -->
+  <script>
+    Vue.component('button-counter', {
+      data() {
+        return {
+          count: 0
+        }
+      },
+      template: '<button v-on:click="count++">You clicked me {{ count }} times. <div><slot></slot></div></button>'
+    })
+
+    new Vue({
+      el: '#app',
+      data: {
+        message: 'this is a message',
+        isShow: true,
+        type: 'a-button'
+      },
+      //  <div v-if="isShow" style="width: 100px; height: 20px;" :type="type">
+      //     Hello World, {{ message }}
+      //     <div class="child" type="text">
+      //         child, {{ message }}
+      //     </div>
+      //     <div class="item" v-for="(item, index) in 10">
+      //         {{ item }}
+      //     </div>
+      template: `
+                <div>
                     <button-counter>
                         I am a slot component
                     </button-counter>
                 </div>`,
-                created() {
-                    this.message = 'create change'
-                }
-            })
-        </script>
-    </body>
+      created() {
+        this.message = 'create change'
+      }
+    })
+
+  </script>
+</body>
+
 </html>

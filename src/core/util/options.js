@@ -435,6 +435,7 @@ export function mergeOptions (
   child: Object,
   vm?: Component
 ): Object {
+  // * 校验选项中的 components 里的名称是否合法。
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)
   }

@@ -79,6 +79,8 @@ export function initMixin (Vue: Class<Component>) {
 
 // * 子组件初始化
 // todo 为什么这种方式会变快？
+// * 因为这个是内部组件，他们的构造函数实际上是 extend Vue 了，所以生成的构造函数已经包含了 options
+// * 此时传入的 options 实际上是 InternalComponentOptions，不需要mergeOptions 合并
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   // * Vue 构造函数的 options
   // * const options: InternalComponentOptions = {
@@ -112,6 +114,8 @@ export function initInternalComponent (vm: Component, options: InternalComponent
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   // * 如果不是继承，options 就是原构造函数的 options
   // * 如果是继承时，options 为合并 superOptions 和 extendOptions 的 options
+
+  // * 此外，这里的 options 还包含了全局 注册的 组件/指令/过滤器
   let options = Ctor.options
   // * Ctor.super 存在说明是调用了 extend 方法进行继承生成的构造函数
   // * 详见 /src/core/global-api/extend.js 文件

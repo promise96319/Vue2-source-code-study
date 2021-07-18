@@ -21,11 +21,15 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         }
         if (type === 'component' && isPlainObject(definition)) {
           definition.name = definition.name || id
+          // * 通过继承，返回新的构造函数（相当于 子组件 的构造函数）
           definition = this.options._base.extend(definition)
         }
         if (type === 'directive' && typeof definition === 'function') {
+          // * 指令的定义
           definition = { bind: definition, update: definition }
         }
+        // * component / directive / filter 
+        // * 将注册的内容全部添加到 Vue 构造函数的 options 上
         this.options[type + 's'][id] = definition
         return definition
       }
