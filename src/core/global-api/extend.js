@@ -22,27 +22,32 @@ export function initExtend (Vue: GlobalAPI) {
     const Super = this
     const SuperId = Super.cid
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
+    // * 1. 查看配置选项中是否缓存有构造函数
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }
 
+    // * 2. 校验组件名称
     const name = extendOptions.name || Super.options.name
     if (process.env.NODE_ENV !== 'production' && name) {
       validateComponentName(name)
     }
 
-    // * 继承
+    // * 3. 继承
     const Sub = function VueComponent (options) {
       this._init(options)
     }
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
+
+    // * 4. 合并选项
     Sub.options = mergeOptions(
       Super.options,
       extendOptions
     )
-    // * 继承的 super
+
+    // * 5. 添加 super
     Sub['super'] = Super
 
     // For props and computed properties, we define the proxy getters on
@@ -55,6 +60,7 @@ export function initExtend (Vue: GlobalAPI) {
       initComputed(Sub)
     }
 
+    // * 6. 添加一些方法
     // allow further extension/mixin/plugin usage
     Sub.extend = Super.extend
     Sub.mixin = Super.mixin
@@ -73,8 +79,12 @@ export function initExtend (Vue: GlobalAPI) {
     // keep a reference to the super options at extension time.
     // later at instantiation we can check if Super's options have
     // been updated.
+    // * 7. 添加一些属性
+    // * 父选项
     Sub.superOptions = Super.options
+    // * 传入的配置选项
     Sub.extendOptions = extendOptions
+    // * 合并后的配置相许那个
     Sub.sealedOptions = extend({}, Sub.options)
 
     // cache constructor

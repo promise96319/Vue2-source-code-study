@@ -41,6 +41,7 @@ export function initMixin (Vue: Class<Component>) {
     } else {
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
+        // vm.constructor.options,
         options || {},
         vm
       )
@@ -76,6 +77,7 @@ export function initMixin (Vue: Class<Component>) {
     }
   }
 }
+
 
 // * 子组件初始化
 // todo 为什么这种方式会变快？

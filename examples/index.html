@@ -5,6 +5,51 @@
 
 <body>
   <div id="app"></div>
+  <!-- <script>
+    Vue.component('test', {})
+    const vm = new Vue({
+      components: {
+        test: 'test'
+      }
+    })
+    console.log('vm.$options ==> ', vm.$options);
+
+  </script> -->
+
+  <!-- 测试 Vue.extend -->
+  <script>
+    const Parent = Vue.extend({
+      watch: {
+        value() {
+          console.log('parent watch')
+        }
+      }
+    })
+    const Child = Parent.extend({
+      watch: {
+        value() {
+          console.log('child watch')
+        }
+      }
+    })
+    const vm = new Child()
+    console.log('vm.$options ==> ', vm.$options);
+
+  </script>
+
+  <!-- 测试 Vue.extend -->
+  <!-- <script>
+    const Parent = Vue.extend({})
+    const Child = Parent.extend({
+      created() {
+        console.log(this.$options.filters.format)
+      }
+    })
+    Parent.options.filters.format = (num) => num / 2
+    const vm = new Child()
+
+  </script> -->
+
   <!-- 测试 hooks 合并 -->
   <!-- <script>
     const extend = {
@@ -26,7 +71,7 @@
       extends: extend,
     })
 
-    new Parent({
+    const Child = Parent.extend({
       created() {
         console.log('child')
       },
@@ -37,6 +82,8 @@
         }
       }
     })
+
+    new Child()
 
   </script> -->
 

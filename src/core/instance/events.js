@@ -10,11 +10,14 @@ import {
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
+  // 存储所有的 events
   vm._events = Object.create(null)
+  // 是否名称以有 hook: 开头的事件
   vm._hasHookEvent = false
   // init parent attached events
   // * init 文件 initInternalComponent 方法
   // * 如果父组件监听了事件，那么这个位置就需要在 vm 上进行监听这个事件，不然无法触发
+  // * 当为父子组件且父组件有监听事件的时候，会在事件添加到子组件上
   const listeners = vm.$options._parentListeners
   if (listeners) {
     updateComponentListeners(vm, listeners)

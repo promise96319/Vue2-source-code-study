@@ -50,6 +50,7 @@ export default class Watcher {
     isRenderWatcher?: boolean
   ) {
     this.vm = vm
+    // 渲染 watcher
     if (isRenderWatcher) {
       vm._watcher = this
     }
@@ -79,6 +80,7 @@ export default class Watcher {
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
+      // 解析 'a.b.c' 的形式
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
         this.getter = noop
@@ -99,10 +101,12 @@ export default class Watcher {
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
+    // 标明当前正在执行的 watcher
     pushTarget(this)
     let value
     const vm = this.vm
     try {
+      // 进行依赖搜集
       value = this.getter.call(vm, vm)
     } catch (e) { 
       if (this.user) {
@@ -113,10 +117,14 @@ export default class Watcher {
     } finally {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
+      // 如果 deep 为 true 的话，会循环遍历获取对象里的每一个值，
+      // 从而触发每一个相关的 watcher 进行 update
       if (this.deep) {
         traverse(value)
       }
+      // 当前正在执行的 watcher 结束，不需要标明了
       popTarget()
+      // 搜集完依赖后，清除旧的依赖
       this.cleanupDeps()
     }
     return value
@@ -127,9 +135,11 @@ export default class Watcher {
    */
   addDep (dep: Dep) {
     const id = dep.id
+    // 如果新的 dep 中不包含该 dep，则添加该 dep
     if (!this.newDepIds.has(id)) {
       this.newDepIds.add(id)
       this.newDeps.push(dep)
+      // 如果旧的 dep 中不包含该 dep，则 dep 里添加该 watcher
       if (!this.depIds.has(id)) {
         dep.addSub(this)
       }
@@ -141,12 +151,14 @@ export default class Watcher {
    */
   cleanupDeps () {
     let i = this.deps.length
+    // 清除在新 deps 中不存在的旧 dep
     while (i--) {
       const dep = this.deps[i]
       if (!this.newDepIds.has(dep.id)) {
         dep.removeSub(this)
       }
     }
+    // 将新 deps 赋值给旧 deps, 移除新 deps
     let tmp = this.depIds
     this.depIds = this.newDepIds
     this.newDepIds = tmp
@@ -196,7 +208,7 @@ export default class Watcher {
         const oldValue = this.value
         this.value = value
 
-        // * 如果是 this.$watch 监听
+        // * 如果是 this.$watch 监听，执行回调
         if (this.user) {
           try {
             this.cb.call(this.vm, value, oldValue)
@@ -213,7 +225,7 @@ export default class Watcher {
   /**
    * Evaluate the value of the watcher.
    * This only gets called for lazy watchers.
-   * * 计算属性 =》 dirty 为true时需要计算，否则不需要
+   * * 计算属性 =》 dirty 为 true时需要计算，否则不需要
    * * 在 get 的时候会触发数据的get, 此时执行依赖搜集将 computed watcher 添加为依赖。
    */
   evaluate () {

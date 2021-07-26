@@ -168,7 +168,7 @@ strats.data = function (
  */
 // * parent hooks 要么不存在，要么是合并后的
 // * 当 parent hooks 不存在时，使用 child 的 array 形式
-// * 当 parent hooks 存在时，使用因为已经合并过，所以为 array 形式
+// * 当 parent hooks 存在时，因为已经合并过，所以为 array 形式
 function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
@@ -254,19 +254,24 @@ strats.watch = function (
   if (parentVal === nativeWatch) parentVal = undefined
   if (childVal === nativeWatch) childVal = undefined
   /* istanbul ignore if */
+  // 子类不存在，使用父类
   if (!childVal) return Object.create(parentVal || null)
   if (process.env.NODE_ENV !== 'production') {
     assertObjectType(key, childVal, vm)
   }
+
+  // 父类不存在，使用子类
   if (!parentVal) return childVal
   const ret = {}
   extend(ret, parentVal)
   for (const key in childVal) {
     let parent = ret[key]
     const child = childVal[key]
+    // 如果父类存在，改写成数组形式
     if (parent && !Array.isArray(parent)) {
       parent = [parent]
     }
+    // 拼接父类和子类
     ret[key] = parent
       ? parent.concat(child)
       : Array.isArray(child) ? child : [child]
@@ -515,6 +520,9 @@ export function resolveAsset (
     return
   }
   const assets = options[type]
+
+  // * 查找对应的 components / directives / filters 定义
+  // * 如 components 一种是全局定义，此时用的 extend；一种是对象形式，components: {}
   // check local registration variations first
   if (hasOwn(assets, id)) return assets[id]
   const camelizedId = camelize(id)

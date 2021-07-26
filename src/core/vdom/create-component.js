@@ -108,7 +108,9 @@ export function createComponent (
   if (isUndef(Ctor)) {
     return
   }
-
+  // * 这里的 Ctor 有几种形式
+  // * 1. 全局形式定义的 component，那么 Ctor 是构造函数形式
+  // * 2. 局部定义的 component，那么是 对象形式。会对对象形式进行 extend 处理
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor

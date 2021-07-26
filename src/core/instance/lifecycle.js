@@ -32,9 +32,10 @@ export function setActiveInstance(vm: Component) {
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
-  // * 建立父子关系，在父元素中 $children 添加自身
+  // 建立父子关系，在父元素中 $children 添加自身
   // locate first non-abstract parent
   let parent = options.parent
+  // keep-alive组件的 abstract 为 true
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
@@ -42,18 +43,24 @@ export function initLifecycle (vm: Component) {
     parent.$children.push(vm)
   }
 
+  // 比较常用的几个属性
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
   vm.$children = []
   vm.$refs = {}
 
-  // * render watcher
+  // 这里存的是渲染 watcher，
+  // 在 vm.$forceUpdate()调用的是此 watcher
   vm._watcher = null
+  // 用于控制组件是否活跃，在 keep-alive 组件有使用
   vm._inactive = null
   vm._directInactive = false
+  // 是否挂载完毕
   vm._isMounted = false
+  // 是否已经销毁
   vm._isDestroyed = false
+  // 是否正在销毁
   vm._isBeingDestroyed = false
 }
 
@@ -358,6 +365,7 @@ export function callHook (vm: Component, hook: string) {
     }
   }
   // * 如果绑定的事件中有 hook:[eventName], 那么 _hasHookEvent 为true
+  // * 可以通过这种方法监听子组件的生命周期事件
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }
