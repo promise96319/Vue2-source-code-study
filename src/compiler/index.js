@@ -33,6 +33,7 @@ export const createCompiler = createCompilerCreator(function baseCompile (
   }
   // * 代码生成（render 函数：可以生成 vnode 树的代码）
   const code = generate(ast, options)
+
   return {
     ast,
     render: code.render,

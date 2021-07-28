@@ -21,6 +21,7 @@ export function initInjections (vm: Component) {
     // * 只监听最外层，内层的值不监听
     toggleObserving(false)
     Object.keys(result).forEach(key => {
+      console.log('result ==> ', result);
       /* istanbul ignore else */
       if (process.env.NODE_ENV !== 'production') {
         // 防止 inject 被重写

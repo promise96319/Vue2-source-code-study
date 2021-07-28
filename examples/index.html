@@ -5,6 +5,50 @@
 
 <body>
   <div id="app"></div>
+  <script>
+    new Vue({
+      el: '#app',
+      template: `<div>
+        编译过程{{ isEasy }}
+      </div>`
+    })
+
+  </script>
+
+  <!-- <script>
+    Vue.component('button-counter', {
+      inject: ['msg'],
+      updated() {
+        console.log('this.msg child ==> ', this.msg);
+      },
+      template: `<div><slot></slot>adsd{{ msg }}</div>`
+    })
+
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          message: 1
+        }
+      },
+      provide() {
+        return {
+          msg: this.message + '1'
+        }
+      },
+      beforeUpdate() {
+        console.log('this.msg ==> ', this.msg);
+        console.log('this.msg ==> ', this._provided.msg);
+        this.$refs.btn.$forceUpdate()
+      },
+      template: `
+        <button-counter ref="btn" @click.native="message = message + 1;_provided.msg=22">
+          I am a slot component{{message}}
+        </button-counter>`,
+    })
+
+  </script> -->
+
   <!-- <script>
     Vue.component('test', {})
     const vm = new Vue({
@@ -17,7 +61,7 @@
   </script> -->
 
   <!-- 测试 Vue.extend -->
-  <script>
+  <!-- <script>
     const Parent = Vue.extend({
       watch: {
         value() {
@@ -35,7 +79,7 @@
     const vm = new Child()
     console.log('vm.$options ==> ', vm.$options);
 
-  </script>
+  </script> -->
 
   <!-- 测试 Vue.extend -->
   <!-- <script>
@@ -87,8 +131,41 @@
 
   </script> -->
 
+  <!-- <script>
+    Vue.component('button-counter', {
+      template: '<button>slots 代码<slot></slot></button>',
+      data() {
+        return {
+          msg: '22;'
+
+        }
+      },
+      created() {
+        console.log('this.msg ==> ', this.msg);
+      }
+    })
+
+    new Vue({
+      el: '#app',
+      data: {
+        msg: 'none;'
+      },
+      template: `
+        <button-counter>
+          I am a slot component
+        </button-counter>`,
+      updated() {
+        console.log('22 ==> ', 22);
+      },
+      created() {
+        console.log('this.msg ==> ', this.msg);
+      }
+    })
+
+  </script> -->
+
   <!-- 测试编译流程 -->
-  <script>
+  <!-- <script>
     Vue.component('button-counter', {
       data() {
         return {
@@ -124,7 +201,7 @@
       }
     })
 
-  </script>
+  </script> -->
 </body>
 
 </html>

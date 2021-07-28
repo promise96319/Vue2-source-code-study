@@ -204,6 +204,7 @@ export function mountComponent (
   } else {
     updateComponent = () => {
       // * vm._render() 生成 vnode 树
+      console.log('vm._render() ==> ', vm._render());
       vm._update(vm._render(), hydrating)
     }
   }
@@ -356,7 +357,7 @@ export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
   // * https://github.com/vuejs/vue/issues/7573
   // * 每次执行生命周期的时候，不进行依赖收集，因此这个位置传的 target 为 undefined
-  pushTarget()
+  // pushTarget()
   const handlers = vm.$options[hook]
   const info = `${hook} hook`
   if (handlers) {
@@ -369,5 +370,5 @@ export function callHook (vm: Component, hook: string) {
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }
-  popTarget()
+  // popTarget()
 }

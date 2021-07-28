@@ -79,10 +79,14 @@ function initProps (vm: Component, propsOptions: Object) {
   }
   for (const key in propsOptions) {
     keys.push(key)
+    // propsOptions 是当前的props，用于校验类型和参数的定义
+    // propsData是 父组件传入的值
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       const hyphenatedKey = hyphenate(key)
+      // 不能是保留的属性 key,ref,slot,slot-scope,is  
+      // 不能是保留的属性 'style,class'
       if (isReservedAttribute(hyphenatedKey) ||
           config.isReservedAttr(hyphenatedKey)) {
         warn(
