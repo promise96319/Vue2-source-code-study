@@ -13,9 +13,13 @@ import { resolveScopedSlots } from './resolve-scoped-slots'
 import { bindDynamicKeys, prependModifier } from './bind-dynamic-keys'
 
 export function installRenderHelpers (target: any) {
+  // 标记once
   target._o = markOnce
+  // 转换成数组
   target._n = toNumber
+  // 转换成字符串
   target._s = toString
+  // 渲染列表
   target._l = renderList
   target._t = renderSlot
   target._q = looseEqual

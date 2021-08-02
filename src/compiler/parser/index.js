@@ -478,6 +478,7 @@ export function processElement (
 
   // * el.ref = ref, el.refInFor = 检查是否在 for 循环中
   processRef(element)
+  // * 解析类似父组件中使用 slot 的情况
   // * el.slot el.slotTarget el.slotTargetDynamic el.scopedSlots
   processSlotContent(element)
   // * 解析 slot 标签
@@ -719,6 +720,7 @@ function processSlotContent (el) {
   if (process.env.NEW_SLOT_SYNTAX) {
     if (el.tag === 'template') {
       // v-slot on <template>
+      // 如 <template v-slot:header>
       const slotBinding = getAndRemoveAttrByRegex(el, slotRE)
       if (slotBinding) {
         if (process.env.NODE_ENV !== 'production') {
@@ -767,12 +769,15 @@ function processSlotContent (el) {
           }
         }
         // add the component's children to its default slot
+        // 当被提供的内容只有默认插槽时，组件的标签才可以被当作插槽的模板来使用
+        // <current-user v-slot:default="slotProps">
         const slots = el.scopedSlots || (el.scopedSlots = {})
         const { name, dynamic } = getSlotName(slotBinding)
         const slotContainer = slots[name] = createASTElement('template', [], el)
         slotContainer.slotTarget = name
         slotContainer.slotTargetDynamic = dynamic
         slotContainer.children = el.children.filter((c: any) => {
+          // todo 这里意味着子slot不能具有 slot-scope，所以内部还能用 slot ?
           if (!c.slotScope) {
             c.parent = slotContainer
             return true
@@ -830,6 +835,7 @@ function processComponent (el) {
   if ((binding = getBindingAttr(el, 'is'))) {
     el.component = binding
   }
+  // todo inline-template 是什么？
   if (getAndRemoveAttr(el, 'inline-template') != null) {
     el.inlineTemplate = true
   }
@@ -843,6 +849,7 @@ function processAttrs (el) {
   for (i = 0, l = list.length; i < l; i++) {
     name = rawName = list[i].name
     value = list[i].value
+    // 是否死通过指令绑定的属性
     if (dirRE.test(name)) {
       // * 如果是绑定的属性 or 事件
       // mark element as dynamic
@@ -883,7 +890,7 @@ function processAttrs (el) {
             name = camelize(name)
           }
           if (modifiers.sync) {
-            // todo: 同步的过程 .sync  => v-model
+            // todo: 同步的过程 .sync 和 :update 共同处理成 => v-model
             syncGen = genAssignmentCode(value, `$event`)
             // * $emit('update:xxx') 事件触发
             if (!isDynamic) {

@@ -125,7 +125,7 @@ export function parseHTML (html, options) {
         }
       }
 
-      // * 如果不是 < 开头，例如 text...text<div>text</div>text</div>
+      // * 如果不是 < 开头或者不是标签，例如 text...text<div>text</div>text</div>
       let text, rest, next
       if (textEnd >= 0) {
         rest = html.slice(textEnd)
@@ -159,7 +159,7 @@ export function parseHTML (html, options) {
         options.chars(text, index - text.length, index)
       }
     } else {
-      // * lastTag 存在 或者是 script/style 标签，说明刚处理完了结束标签
+      // * lastTag 存在 且是 script/style 标签，说明刚处理完了结束标签
       // todo 不清楚这里是干嘛的？
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
@@ -205,6 +205,8 @@ export function parseHTML (html, options) {
   function parseStartTag () {
     // * <div> => ['<div', 'div', ...]
     const start = html.match(startTagOpen)
+
+    console.log('start ==> ', JSON.stringify(start), start);
     if (start) {
       const match = {
         tagName: start[1],
@@ -220,6 +222,7 @@ export function parseHTML (html, options) {
         attr.end = index
         match.attrs.push(attr)
       }
+      console.log('match ==> ', JSON.stringify(match));
       if (end) {
         // * 是否是以 /> 结尾的闭合标签, end[1]表示 / or undefined
         match.unarySlash = end[1]
@@ -274,6 +277,8 @@ export function parseHTML (html, options) {
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end })
       lastTag = tagName
     }
+
+    console.log('attrs ==> ', JSON.stringify(attrs));
 
     // * 将解析出来的标签进行进一步处理
     if (options.start) {

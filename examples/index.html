@@ -5,15 +5,18 @@
 
 <body>
   <div id="app"></div>
-  <script>
+  <!-- <script>
     new Vue({
       el: '#app',
-      template: `<div>
-        编译过程{{ isEasy }}
-      </div>`
+      data() {
+        return {
+          isShow: true
+        }
+      },
+      template: `<div v-if="isShow" class="header">编译过程</div>`
     })
 
-  </script>
+  </script> -->
 
   <!-- <script>
     Vue.component('button-counter', {
@@ -131,9 +134,9 @@
 
   </script> -->
 
-  <!-- <script>
+  <script>
     Vue.component('button-counter', {
-      template: '<button>slots 代码<slot></slot></button>',
+      template: `<button>代码<slot name="header" :user="{name: 'qgh'}"></slot></button>`,
       data() {
         return {
           msg: '22;'
@@ -152,7 +155,10 @@
       },
       template: `
         <button-counter>
-          I am a slot component
+          <template v-slot:header="scope">
+          I am a slot component: {{ scope.user.name }}
+
+            </template>
         </button-counter>`,
       updated() {
         console.log('22 ==> ', 22);
@@ -162,7 +168,7 @@
       }
     })
 
-  </script> -->
+  </script>
 
   <!-- 测试编译流程 -->
   <!-- <script>
