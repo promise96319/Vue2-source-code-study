@@ -44,6 +44,9 @@ export function resolveAsyncComponent (
   factory: Function,
   baseCtor: Class<Component>
 ): Class<Component> | void {
+  // 第一次创建的时候是不存在的
+  // 等下一轮事件循环的时候已经加载完成
+  // 此时通知父组件更新，也就是会触发 updated 事件。
   if (isTrue(factory.error) && isDef(factory.errorComp)) {
     return factory.errorComp
   }
@@ -52,6 +55,8 @@ export function resolveAsyncComponent (
     return factory.resolved
   }
 
+  // 记录哪些组件使用了异步组件
+  // 当异步组件加载完成的时候触发相应组件更新
   const owner = currentRenderingInstance
   if (owner && isDef(factory.owners) && factory.owners.indexOf(owner) === -1) {
     // already pending
@@ -88,6 +93,7 @@ export function resolveAsyncComponent (
       }
     }
 
+    // 仅加载一次，然后缓存起来，下一次直接使用
     const resolve = once((res: Object | Class<Component>) => {
       // cache resolved
       factory.resolved = ensureCtor(res, baseCtor)
@@ -119,6 +125,7 @@ export function resolveAsyncComponent (
         if (isUndef(factory.resolved)) {
           res.then(resolve, reject)
         }
+      // { component: () => Promise }
       } else if (isPromise(res.component)) {
         res.component.then(resolve, reject)
 

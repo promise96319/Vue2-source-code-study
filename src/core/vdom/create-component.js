@@ -44,6 +44,7 @@ const componentVNodeHooks = {
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // 创建子组件
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
@@ -99,11 +100,11 @@ const componentVNodeHooks = {
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
 export function createComponent (
-  Ctor: Class<Component> | Function | Object | void,
+  Ctor: Class<Component> | Function | Object | void, // 组件的配置 or 组件的构造函数
   data: ?VNodeData,
-  context: Component,
+  context: Component,  // 当前的实例
   children: ?Array<VNode>,
-  tag?: string
+  tag?: string // 组件名称
 ): VNode | Array<VNode> | void {
   if (isUndef(Ctor)) {
     return
@@ -114,6 +115,7 @@ export function createComponent (
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor
+  // 局部注册的组件为配置形式
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor)
   }
@@ -129,6 +131,7 @@ export function createComponent (
 
   // async component
   let asyncFactory
+  // 异步组件的 Ctor 为函数形式，但是没有cid
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor)
@@ -161,6 +164,7 @@ export function createComponent (
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
   // functional component
+  // 函数式组件
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
@@ -224,6 +228,8 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  // render 阶段 createComponent 生成vnode的时候，
+  // 数据都存在componentOptions中的
   return new vnode.componentOptions.Ctor(options)
 }
 

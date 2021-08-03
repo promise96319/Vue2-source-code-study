@@ -81,6 +81,7 @@ export default {
   },
 
   render () {
+    // component 默认会有 slot
     const slot = this.$slots.default
     const vnode: VNode = getFirstComponentChild(slot)
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
@@ -106,6 +107,7 @@ export default {
       if (cache[key]) {
         vnode.componentInstance = cache[key].componentInstance
         // make current key freshest
+        // 把key放到最后，移除的时候也会最后移除
         remove(keys, key)
         keys.push(key)
       } else {

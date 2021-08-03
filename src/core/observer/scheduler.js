@@ -170,6 +170,9 @@ export function queueWatcher (watcher: Watcher) {
     } else {
       // if already flushing, splice the watcher based on its id
       // if already past its id, it will be run next immediately.
+      // 如果过了这个id应该早就执行，但是错过了
+      // 那么 while 循环相当于将它置于最前面了
+      // 下一个就会执行它
       let i = queue.length - 1
       while (i > index && queue[i].id > watcher.id) {
         i--

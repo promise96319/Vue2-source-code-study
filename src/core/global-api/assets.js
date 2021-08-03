@@ -19,6 +19,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         if (process.env.NODE_ENV !== 'production' && type === 'component') {
           validateComponentName(id)
         }
+        // 如果是函数形式组件，则不需要进行继承处理 - 异步组件
         if (type === 'component' && isPlainObject(definition)) {
           definition.name = definition.name || id
           // * 通过继承，返回新的构造函数（相当于 子组件 的构造函数）

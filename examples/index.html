@@ -1,19 +1,116 @@
 <html>
 <header>
-  <script src="../dist/vue.js"></script>
+  <!-- <script src="./vuex/index.js"></script> -->
+  <script src="./dist/vue.js"></script>
+  <script src="./vue-router/index.js"></script>
 </header>
 
 <body>
   <div id="app"></div>
-  <!-- <script>
+
+  <script type="module">
+    Vue.component('RouterView', {
+      render(h) {
+        console.log('触发渲染 ==> ', '触发渲染');
+        const route = this._route || {}
+        console.log('route ==> ', route);
+        return h(route.component)
+      }
+    })
+
+    const A = Vue.component('CompA', {
+      template: `<button>A button</button>`
+    })
+    const B = Vue.component('CompB', {
+      template: `<button>B button</button>`
+    })
+
+    const router = new VueRouter({
+      routes: [{
+          name: 'CompA',
+          path: '/a',
+          component: 'CompA'
+        },
+        {
+          name: 'CompB',
+          path: '/b',
+          component: 'CompB'
+        }
+      ]
+    })
+
     new Vue({
       el: '#app',
+      router,
+      methods: {
+        changeRouter(name) {
+          this.$router.push({
+            name
+          })
+        }
+      },
+      template: `
+        <div>
+          <button @click="changeRouter('CompA')">CompA</button>
+          <button @click="changeRouter('CompB')">CompB</button> </br>
+          <router-view></router-view> </br>
+          <router-view></router-view> </br>
+          <router-view></router-view> </br>
+        </div>
+        `
+    })
+
+  </script>
+
+  <!-- <script type="module">
+    Vue.use(Vuex)
+    const store = new Vuex.Store({
+      state: {
+        name: '张三',
+        asyncName: '异步名称'
+      },
+      getters: {
+        totalName(state) {
+          return state.name + '-后缀'
+        }
+      },
+      mutations: {
+        changeName(state, payload) {
+          console.log('state ==> ', state);
+          console.log('payload ==> ', payload);
+
+          state.name = payload
+        }
+      },
+      actions: {
+        asyncChangeName(state, payload) {
+          setTimeout(() => {
+            state.asyncName = payload
+          }, 300);
+        }
+      }
+    })
+
+    new Vue({
+      el: '#app',
+      store,
       data() {
         return {
           isShow: true
         }
       },
-      template: `<div v-if="isShow" class="header">编译过程</div>`
+      methods: {
+        changeName() {
+          const random = Math.random().toFixed(3)
+          this.$store.dispatch('asyncChangeName', '异步名称' + random)
+          this.$store.commit('changeName', '同步' + random)
+        }
+      },
+      template: `<div @click="changeName">
+        {{ $store.state.name }}  <br />
+        {{ $store.state.asyncName }} <br />
+        {{ $store.getters.totalName }} <br />
+        </div>`
     })
 
   </script> -->
@@ -134,18 +231,21 @@
 
   </script> -->
 
-  <script>
-    Vue.component('button-counter', {
-      template: `<button>代码<slot name="header" :user="{name: 'qgh'}"></slot></button>`,
-      data() {
-        return {
-          msg: '22;'
+  <!-- <script>
+    Vue.component('async-button', function (resolve, reject) {
+      setTimeout(function () {
+          const config = {
+            template: `<button>代码<slot name="header" :user="{name: 'qgh'}"></slot></button>`,
+            data() {
+              return {
+                msg: '22;'
+              }
+            }
+          }
 
-        }
-      },
-      created() {
-        console.log('this.msg ==> ', this.msg);
-      }
+          resolve(config)
+        },
+        0)
     })
 
     new Vue({
@@ -154,12 +254,15 @@
         msg: 'none;'
       },
       template: `
-        <button-counter>
-          <template v-slot:header="scope">
-          I am a slot component: {{ scope.user.name }}
+        <keep-alive>
+          <async-button>
+            <template v-slot:header="scope">
+              I am a slot component: {{ scope.user.name }}
 
             </template>
-        </button-counter>`,
+          </async-button>
+          </keep-alive>  
+      `,
       updated() {
         console.log('22 ==> ', 22);
       },
@@ -168,7 +271,7 @@
       }
     })
 
-  </script>
+  </script> -->
 
   <!-- 测试编译流程 -->
   <!-- <script>

@@ -58,6 +58,7 @@ function sameInputType (a, b) {
   return typeA === typeB || isTextInputType(typeA) && isTextInputType(typeB)
 }
 
+// key index : { key, index } 将键提取出来，加快对比速度
 function createKeyToOldIdx (children, beginIdx, endIdx) {
   let i, key
   const map = {}
@@ -145,6 +146,7 @@ export function createPatchFunction (backend) {
     }
 
     vnode.isRootInsert = !nested // for transition enter check
+    // 如果是组件，则创建相应节点
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
       return
     }
@@ -217,6 +219,7 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 创建Component
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
     if (isDef(i)) {
@@ -229,6 +232,7 @@ export function createPatchFunction (backend) {
       // component also has set the placeholder vnode's elm.
       // in that case we can just return the element and be done.
       if (isDef(vnode.componentInstance)) {
+        // todo 拿到实例后该怎么办
         initComponent(vnode, insertedVnodeQueue)
         insert(parentElm, vnode.elm, refElm)
         if (isTrue(isReactivated)) {
@@ -442,10 +446,13 @@ export function createPatchFunction (backend) {
 
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
       if (isUndef(oldStartVnode)) {
+        // 开始节点不存在 + 1
         oldStartVnode = oldCh[++oldStartIdx] // Vnode has been moved left
       } else if (isUndef(oldEndVnode)) {
+        // 结束节点不存在 - 1
         oldEndVnode = oldCh[--oldEndIdx]
       } else if (sameVnode(oldStartVnode, newStartVnode)) {
+        // 节点类型相同，递归
         patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx)
         oldStartVnode = oldCh[++oldStartIdx]
         newStartVnode = newCh[++newStartIdx]
@@ -548,8 +555,9 @@ export function createPatchFunction (backend) {
 
     const elm = vnode.elm = oldVnode.elm
 
-    // todo ??? 异步相关
+    // 如果是异步组件
     if (isTrue(oldVnode.isAsyncPlaceholder)) {
+      // 如果异步组件已经加载完毕了
       if (isDef(vnode.asyncFactory.resolved)) {
         hydrate(oldVnode.elm, vnode, insertedVnodeQueue)
       } else {
@@ -568,40 +576,48 @@ export function createPatchFunction (backend) {
       vnode.key === oldVnode.key &&
       (isTrue(vnode.isCloned) || isTrue(vnode.isOnce))
     ) {
+      // 由于内容都可以复用，vnode 和 oldVnode 几乎差不多
       vnode.componentInstance = oldVnode.componentInstance
       return
     }
 
     let i
     const data = vnode.data
-    // todo ?
+    // t如果是组件的话，那么会执行prepatch方法 updateChildComponent
     if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
+      // 更新子组件
       i(oldVnode, vnode)
     }
 
     const oldCh = oldVnode.children
     const ch = vnode.children
-    // todo 更新节点属性？
+    // 更新老旧 vnode 节点属性
     if (isDef(data) && isPatchable(vnode)) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
+      // 组件没有 update 方法
       if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
     }
     if (isUndef(vnode.text)) {
       // * 同时存在时，进行 diff 算法
       if (isDef(oldCh) && isDef(ch)) {
+        // diff 算法
         if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
       } else if (isDef(ch)) {
         if (process.env.NODE_ENV !== 'production') {
           checkDuplicateKeys(ch)
         }
         if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '')
+        // 循环创建真实节点
         addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
       } else if (isDef(oldCh)) {
+        // 移除老节点
         removeVnodes(oldCh, 0, oldCh.length - 1)
       } else if (isDef(oldVnode.text)) {
+        // 文本节点
         nodeOps.setTextContent(elm, '')
       }
     } else if (oldVnode.text !== vnode.text) {
+      // 文本节点
       nodeOps.setTextContent(elm, vnode.text)
     }
     if (isDef(data)) {
@@ -805,7 +821,7 @@ export function createPatchFunction (backend) {
         )
 
         // update parent placeholder node element, recursively
-        // todo 为什么会更新父节点？
+        // 子组件更新了，递归更新父组件
         if (isDef(vnode.parent)) {
           let ancestor = vnode.parent
           const patchable = isPatchable(vnode)
