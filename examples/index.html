@@ -8,7 +8,7 @@
 <body>
   <div id="app"></div>
 
-  <script type="module">
+  <!-- <script type="module">
     Vue.component('RouterView', {
       render(h) {
         console.log('触发渲染 ==> ', '触发渲染');
@@ -60,9 +60,9 @@
         `
     })
 
-  </script>
+  </script> -->
 
-  <!-- <script type="module">
+  <script type="module">
     Vue.use(Vuex)
     const store = new Vuex.Store({
       state: {
@@ -94,11 +94,6 @@
     new Vue({
       el: '#app',
       store,
-      data() {
-        return {
-          isShow: true
-        }
-      },
       methods: {
         changeName() {
           const random = Math.random().toFixed(3)
@@ -113,7 +108,7 @@
         </div>`
     })
 
-  </script> -->
+  </script>
 
   <!-- <script>
     Vue.component('button-counter', {

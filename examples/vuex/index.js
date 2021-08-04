@@ -1,7 +1,6 @@
 let _Vue
 
 class Store {
-
   constructor(options = {}) {
     const { state, mutations, actions, getters } = options
     this.mutations = mutations
@@ -28,9 +27,8 @@ class Store {
         ...computed
       }
     })
-    // console.log('this._vm._data.$$state ==> ', this._vm._data.$$state);
-    // this.state = state
 
+    // 同样可以实现响应式，但是 getters 实现又需要单独处理，比较麻烦
     // this.state = _Vue.observable(state)
   }
 
@@ -38,13 +36,12 @@ class Store {
     return this._vm._data.$$state
   }
 
-  // set state (err) {
-  //   console.log('err ==> ', err);
-  // }
+  set state (val) {
+    throw new Error('无法直接修改 state')
+  }
 
   commit(type, payload) {
     const handler = this.mutations[type]
-    console.log('this.state ==> ', this.state);
     handler(this.state, payload)
   }
 
@@ -55,21 +52,21 @@ class Store {
   }
 }
 
-function install(Vue) {
-    _Vue = Vue
-    Vue.mixin({
-      beforeCreate () {
-        const options = this.$options
-        if (options.store) {
-          this.$store = options.store
-        } else if (options.parent && options.parent.$store) {
-          this.$store = options.parent.$store
-        }
+const install = (Vue) => {
+  _Vue = Vue
+  Vue.mixin({
+    beforeCreate () {
+      const options = this.$options
+      if (options.store) {
+        this.$store = options.store
+      } else if (options.parent && options.parent.$store) {
+        this.$store = options.parent.$store
       }
-    })
-  }
+    }
+  })
+}
 
-window.Vuex = {
+export default {
   Store,
   install
 }
